@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html ng-app="NeoAPI">
+<head>
+    <title>NeoAPI</title>
+    <link rel="stylesheet" href="/public/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/public/css/global.css"/>
+</head>
+<body>
+<header id="header">
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container">
+            <div class="navar-header">
+                <a class="navbar-brand" href="#/index">NeoAPI</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="#/project">项目</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div class="container" ng-view>
+
+</div>
+
+<footer id="footer">
+    <div class="container">
+        <p>Do it right, Do it right now!</p>
+    </div>
+</footer>
+
+<script src="/public/lib/jquery/dist/jquery.js"></script>
+<script src="/public/lib/angular/angular.js"></script>
+<script src="/public/lib/angular-route/angular-route.js"></script>
+<script src="/public/js/app.js"></script>
+</body>
+</html>

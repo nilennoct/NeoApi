@@ -1,0 +1,33 @@
+.param-table tbody>tr>td {
+  padding: 0;
+  p {
+    padding: 8px;
+  }
+}
+
+.param-table tbody>tr.sub>td {
+  padding-left: 8px;
+}
+.sub table {
+  margin: 0;
+}
+.table-input {
+  padding-left: 8px;
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  border: 0 none;
+  outline: 0 none;
+  background: #fff;
+
+  &:hover {
+    background: #f6f6f6;
+  }
+  &:focus {
+//    border: 1px solid #ccc;
+    background: #eee;
+  }
+  .sub & {
+//    padding: 16px;
+  }
+}
