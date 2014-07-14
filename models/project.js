@@ -8,13 +8,15 @@ var mongodb = require('./db');
 var Project = function Project(project) {
   this._id = project._id || null;
   this.name = project.name;
+  this.description = project.description;
 };
 
 module.exports = Project;
 
-Project.prototype.insert = function insert() {
+Project.prototype.insert = function insert(callback) {
   var project = {
-    name: this.name
+    name: this.name,
+    description: this.description
   };
 
   mongodb.project.ensureIndex('name', {unique: true}, function (err, indexName) {
@@ -30,7 +32,8 @@ Project.prototype.insert = function insert() {
 Project.prototype.update = function update(callback) {
   var _id = ObjectID.createFromHexString(this._id);
   var project = {
-    name: this.name
+    name: this.name,
+    description: this.description
   };
 
   mongodb.project.update({_id: _id}, {$set: project}, function (err, result) {

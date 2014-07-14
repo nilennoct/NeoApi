@@ -63,18 +63,79 @@ router.route('/logout').all(function (req, res) {
  * route for projects
  */
 
-router.route('/project').all(function(req, res) {
-  Project.all(function(err, projects) {
-    if (err || ! projects) {
-      return res.send(403);
-    }
+router.route('/project')
+  .get(function(req, res) {
+    Project.all(function(err, projects) {
+      if (err || ! projects) {
+        return res.send(403);
+      }
 
-    res.json({
-      status: 0,
-      projects: projects
+      res.json({
+        status: 0,
+        projects: projects
+      });
+    })
+  })
+  .post(function(req, res) {
+    var project = new Project(req.body);
+
+    project.insert(function(err, project) {
+      if (err || project.length === 0) {
+        return res.send(403);
+      }
+
+      res.json({
+        status: 0,
+        projectId: project[0]._id
+      });
+    });
+  });
+
+router.route('/project/:projectId')
+  .get(function(req, res) {
+    var projectId = req.param('projectId');
+
+    Project.get(projectId, function(err, project) {
+      if (err || ! project) {
+        return res.send(404);
+      }
+
+      res.json({
+        status: 0,
+        project: project
+      })
+    })
+  })
+  .put(function(req, res) {
+    var project = new Project(req.body);
+
+    project.update(function(err, result) {
+      if (err) {
+        return res.send(403);
+      }
+
+      res.json({
+        status: 0,
+        result: result
+      });
     });
   })
-});
+  .delete(function(req, res) {
+    var project = new Project({
+      _id: req.param('projectId')
+    });
+
+    project.remove(function(err, result) {
+      if (err) {
+        return res.send(403);
+      }
+
+      res.json({
+        status: 0,
+        result: result
+      });
+    });
+  });
 
 /**
  * route for apis
@@ -99,18 +160,18 @@ router.route('/api/:projectId')
     var api = new Api(req.body);
 
     api.insert(function(err, api) {
-      if (err || ! api) {
+      if (err || api.length === 0) {
         return res.send(403);
       }
-console.log(api);
+
       res.json({
         status: 0,
-        apiId: api._id
+        apiId: api[0]._id
       });
     });
   });
 
-router.route('/api/:apiId')
+router.route('/api/:projectId/:apiId')
   .get(function(req, res) {
     var apiId = req.param('apiId');
 

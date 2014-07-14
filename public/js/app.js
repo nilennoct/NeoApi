@@ -19,6 +19,10 @@ neoAPIRouter.config(['$routeProvider', function($routeProvider) {
       templateUrl: tplUrl + 'api.html',
       controller: ApiCtrl
     }).
+    when('/doc/:projectId', {
+      templateUrl: tplUrl + 'doc.html',
+      controller: ApiCtrl
+    }).
     when('/', {
       templateUrl: tplUrl + 'index.html'
     }).
@@ -30,10 +34,25 @@ neoAPIRouter.config(['$routeProvider', function($routeProvider) {
 neoAPIService.factory('Project', ['$http', function($http) {
   var url = '/project/';
   return {
-    query: function(callback) {
+    'query': function(callback) {
       $http.get(url).success(function(json) {
         callback(json);
       });
+    },
+    'post': function(project, callback) {
+      return $http.post(url, project).success(function(json) {
+        callback(json);
+      });
+    },
+    'put': function(project, callback) {
+      return $http.put(url + project._id, project).success(function(json) {
+        callback(json);
+      });
+    },
+    'delete': function(project, callback) {
+      return $http.delete(url + project._id).success(function(json) {
+        callback(json);
+      })
     }
   }
 }]);
@@ -41,37 +60,95 @@ neoAPIService.factory('Project', ['$http', function($http) {
 neoAPIService.factory('Api', ['$http', function($http) {
   var url = '/api/';
   return {
-    query: function(projectId, callback) {
-      $http.get(url + projectId).success(function(json) {
+    'query': function(projectId, callback) {
+      return $http.get(url + projectId).success(function(json) {
         callback(json);
       });
     },
-    put: function(api, callback) {
-      $http.put(url + api._id, api).success(function(json) {
+    'post': function(api, callback) {
+      return $http.post(url + api.projectId, api).success(function(json) {
         callback(json);
       });
     },
-    post: function(projectId, api, callback) {
-      $http.post(url + projectId, api).success(function(json) {
+    'put': function(api, callback) {
+      return $http.put(url + [api.projectId, api._id].join('/'), api).success(function(json) {
         callback(json);
       });
+    },
+    'delete': function(api, callback) {
+      return $http.delete(url + [api.projectId, api._id].join('/')).success(function(json) {
+        callback(json);
+      })
     }
   }
 }]);
 
 neoAPIController.controller('ProjectCtrl', ['$scope', 'Project', ProjectCtrl]);
-neoAPIController.controller('ApiCtrl', ['$scope', '$routeParams', 'Api', ApiCtrl]);
+neoAPIController.controller('ApiCtrl', ['$scope', '$timeout', '$routeParams', 'Api', ApiCtrl]);
+neoAPIController.controller('DocCtrl', ['$scope', '$timeout', '$routeParams', 'Api', DocCtrl]);
 
 function ProjectCtrl($scope, Project) {
   Project.query(function(data) {
     $scope.projects = data.projects;
   });
+
+  $scope.newProject = null;
+  $scope.projectCache = {};
+
+  $scope.create = function create() {
+    $scope.newProject = {
+      name: '',
+      description: ''
+    }
+  };
+
+  $scope.edit = function edit(project) {
+    $scope.projectCache[project._id] = angular.copy(project);
+    project.edit = true;
+  };
+
+  $scope.save = function save(project) {
+    if (typeof project === 'undefined') {
+      Project.post($scope.newProject, function(data) {
+        if (data.status === 0) {
+          $scope.newProject._id = data.projectId;
+          $scope.projects.push($scope.newProject);
+          $scope.newProject = null;
+        }
+      });
+    }
+    else {
+      Project.put(project, function(data) {
+        if (data.status === 0) {
+          delete project.edit;
+          delete $scope.projectCache[project._id];
+        }
+      });
+    }
+  };
+
+  $scope.cancel = function cancel(project) {
+    if (typeof project !== 'undefined') {
+      var projectId = project._id;
+      project = angular.extend(project, $scope.projectCache[projectId]);
+      delete project.edit;
+      delete $scope.projectCache[projectId];
+    }
+    else {
+      $scope.newProject = null;
+    }
+  }
 }
 
-function ApiCtrl($scope, $routeParams, Api) {
+function ApiCtrl($scope, $timeout, $routeParams, Api) {
   $scope.selected = {
     api: null,
     index: -1
+  };
+
+  $scope.filter = {
+    name: '',
+    url: ''
   };
 
   $scope.methodTypes = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -120,6 +197,7 @@ function ApiCtrl($scope, $routeParams, Api) {
   };
 
   $scope.createParam = function createParam(param) {
+    debugger;
     if (angular.isArray(param)) {
       param.push({
         name: '',
@@ -152,12 +230,31 @@ function ApiCtrl($scope, $routeParams, Api) {
       });
     }
     else {
-      Api.post($scope.projectId, $scope.selected.api, function(data) {
+      Api.post($scope.selected.api, function(data) {
         $scope.selected.api._id = data.apiId;
         $scope.apis.push($scope.selected.api);
         $scope.selected.index = $scope.apis.length - 1;
-        angular.element('#apiList').find(':eq(' + $scope.apis.length + ')').addClass('active');
-      })
+        angular.element('#apiList').find('.active').removeClass('active');
+        $timeout(function() {
+          angular.element('#apiList').find(':eq(' + $scope.apis.length + ')').addClass('active');
+        }, 200);
+      });
     }
+  };
+
+  $scope.remove = function remove() {
+    Api.delete($scope.selected.api, function(data) {
+      if (data.status === 0) {
+        $scope.apis.splice($scope.selected.index, 1);
+        $scope.selected = {
+          api: null,
+          index: -1
+        }
+      }
+    })
   }
+}
+
+function DocCtrl($scope, $timeout, $routeParams, Api) {
+
 }

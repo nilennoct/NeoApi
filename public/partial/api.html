@@ -1,8 +1,14 @@
 <div class="row">
     <div class="col-md-3">
         <div id="apiList" class="list-group">
+            <!--<div class="list-group-item">
+                <div class="input-group">
+                    <input class="form-control" type="text" ng-model="filter.url" />
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                </div>
+            </div>-->
             <a class="list-group-item list-group-item-success" href="javascript:void(0)" ng-click="create()">新建接口</a>
-            <a class="list-group-item" ng-repeat="api in apis" href="javascript:void(0)" ng-bind="api.name" ng-click="select($index)"></a>
+            <a class="list-group-item" ng-repeat="api in apis | filter: {url: filter.url}" href="javascript:void(0)" ng-bind="api.name" ng-click="select($index)"></a>
         </div>
     </div>
 
@@ -13,6 +19,7 @@
                 <div class="panel-body">
                     <div class="btn-group pull-right">
                         <button class="btn btn-success" type="button" ng-click="save()">保存</button>
+                        <button class="btn btn-danger" type="button" ng-click="remove()" ng-show="selected.api._id">删除</button>
                         <button class="btn btn-default" type="button" ng-click="reset()">重置</button>
                     </div>
                     <div class="form-group">
@@ -41,52 +48,19 @@
                     <span>请求参数</span>
                     <button class="btn btn-xs btn-success" type="button" ng-click="createParam(selected.api.reqParams)"><span class="glyphicon glyphicon-plus"></span></button>
                 </div>
-                <table class="table param-table">
-                    <thead>
-                    <tr>
-                        <th class="col-sm-1"></th>
-                        <th class="col-sm-2">名称</th>
-                        <th class="col-sm-2">类型</th>
-                        <th class="col-sm-7">备注</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-show="selected.api.reqParams.length === 0">
-                        <td colspan="3"><p>暂无参数</p></td>
-                    </tr>
-                    <tr ng-repeat-start="param in selected.api.reqParams">
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-xs btn-danger" type="button" ng-click="removeParam($index, selected.api.reqParams)"><span class="glyphicon glyphicon-minus"></span></button>
-                                <button class="btn btn-xs btn-success" type="button" ng-click="createParam(param)" ng-if="canCreateSubParam(param.type)"><span class="glyphicon glyphicon-plus"></span></button>
-                            </div>
-                        </td>
-                        <td><input class="table-input" type="text" ng-model="param.name"/></td>
-                        <td><select class="table-input" ng-model="param.type" ng-options="type for type in paramTypes"></select></td>
-                        <td><input class="table-input" type="text" ng-model="param.note"/></td>
-                    </tr>
-                    <tr class="sub" ng-repeat-end ng-if="param.params">
-                        <td colspan="4">
-                            <table class="table">
-                                <tbody>
-                                <tr ng-repeat="subParam in param.params">
-                                    <td class="col-sm-1">
-                                        <div class="btn-group">
-                                            <button class="btn btn-xs btn-danger" type="button" ng-click="removeParam($index, params)"><span class="glyphicon glyphicon-minus"></span></button>
-                                            <button class="btn btn-xs btn-success" type="button" ng-click="createParam(subParam)" ng-if="canCreateSubParam(subParam.type)"><span class="glyphicon glyphicon-plus"></span></button>
-                                        </div>
-                                    </td>
-                                    <td class="col-sm-2"><input class="table-input" type="text" ng-model="subParam.name"/></td>
-                                    <td class="col-sm-2"><select class="table-input" ng-model="subParam.type" ng-options="type for type in paramTypes"></select></td>
-                                    <td class="col-sm-7"><input class="table-input" type="text" ng-model="subParam.note"/></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </td>
 
-                    </tr>
-                    </tbody>
-                </table>
+                <ul class="list-group param-list param-list-editable">
+                    <li class="list-group-item">
+                        <dt class="col-sm-1"></dt>
+                        <dt class="col-sm-2">名称</dt>
+                        <dt class="col-sm-2">类型</dt>
+                        <dt class="col-sm-7">备注</dt>
+                    </li>
+                    <li class="list-group-item" ng-show="selected.api.reqParams.length === 0">
+                        <p>暂无参数</p>
+                    </li>
+                    <li class="list-group-item" ng-repeat="param in (params = selected.api.reqParams)" ng-include="'paramTable.html'"></li>
+                </ul>
             </div>
 
             <div class="panel panel-default">
@@ -94,44 +68,36 @@
                     <span>响应参数</span>
                     <button class="btn btn-xs btn-success" type="button" ng-click="createParam(selected.api.resParams)"><span class="glyphicon glyphicon-plus"></span></button>
                 </div>
-                <table class="table param-table">
-                    <thead>
-                    <tr>
-                        <th class="col-sm-1"></th>
-                        <th class="col-sm-2">名称</th>
-                        <th class="col-sm-2">类型</th>
-                        <th class="col-sm-6">备注</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-show="selected.api.resParams.length === 0">
-                        <td colspan="3"><p>暂无参数</p></td>
-                    </tr>
-                    <tr ng-repeat-start="param in selected.api.resParams">
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-xs btn-danger" type="button" ng-click="removeParam($index, selected.api.resParams)"><span class="glyphicon glyphicon-minus"></span></button>
-                                <button class="btn btn-xs btn-success" type="button" ng-click="createParam(param)" ng-if="canCreateSubParam(param.type)"><span class="glyphicon glyphicon-plus"></span></button>
-                            </div>
-                        </td>
-                        <td><input class="table-input" type="text" ng-model="param.name"/></td>
-                        <td><select class="table-input" ng-model="param.type" ng-options="type for type in paramTypes"></select></td>
-                        <td><input class="table-input" type="text" ng-model="param.note"/></td>
-                    </tr>
-                    <tr class="sub" ng-repeat="subParam in param.params" ng-repeat-end>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-xs btn-danger" type="button" ng-click="removeParam($index, params)"><span class="glyphicon glyphicon-minus"></span></button>
-                                <button class="btn btn-xs btn-success" type="button" ng-click="createParam(param)" ng-if="canCreateSubParam(subParam.type)"><span class="glyphicon glyphicon-plus"></span></button>
-                            </div>
-                        </td>
-                        <td><input class="table-input" type="text" ng-model="subParam.name"/></td>
-                        <td><select class="table-input" ng-model="subParam.type" ng-options="type for type in paramTypes"></select></td>
-                        <td><input class="table-input" type="text" ng-model="subParam.note"/></td>
-                    </tr>
-                    </tbody>
-                </table>
+                <ul class="list-group param-list param-list-editable">
+                    <li class="list-group-item">
+                        <dt class="col-sm-1"></dt>
+                        <dt class="col-sm-2">名称</dt>
+                        <dt class="col-sm-2">类型</dt>
+                        <dt class="col-sm-7">备注</dt>
+                    </li>
+                    <li class="list-group-item" ng-show="selected.api.resParams.length === 0">
+                        <p>暂无参数</p>
+                    </li>
+                    <li class="list-group-item" ng-repeat="param in (params = selected.api.resParams)" ng-include="'paramTable.html'"></li>
+                </ul>
             </div>
         </form>
     </div>
 </div>
+
+<script type="text/ng-template" id="paramTable.html">
+    <dd class="col-sm-1">
+        <!--<div class="btn-group">
+            <button class="btn btn-xs btn-danger" type="button" ng-click="removeParam($index, params)"><span class="glyphicon glyphicon-minus"></span></button>
+            <button class="btn btn-xs btn-success" type="button" ng-click="createParam(param)" ng-if="canCreateSubParam(param.type)"><span class="glyphicon glyphicon-plus"></span></button>
+        </div>-->
+        <button class="label label-danger" type="button" ng-click="removeParam($index, params)"><span class="glyphicon glyphicon-minus"></span></button>
+        <button class="label label-success" type="button" ng-click="createParam(param)" ng-if="canCreateSubParam(param.type)"><span class="glyphicon glyphicon-plus"></span></button>
+    </dd>
+    <dt class="col-sm-2"><input class="table-input" type="text" ng-model="param.name"/></dt>
+    <dd class="col-sm-2"><select class="table-input" ng-model="param.type" ng-options="type for type in paramTypes"></select></dd>
+    <dd class="col-sm-7"><input class="table-input" type="text" ng-model="param.note"/></dd>
+    <ul class="list-group col-md-12" ng-if="param.params.length > 0">
+        <li class="list-group-item" ng-repeat="param in (params = param.params)" ng-include="'paramTable.html'"></li>
+    </ul>
+</script>

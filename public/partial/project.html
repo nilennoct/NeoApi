@@ -1,3 +1,50 @@
-<ul id="projectList">
-    <li ng-repeat="project in projects"><a ng-href="#/project/{{project._id}}" ng-bind="project.name"></a></li>
+<div class="col-md-2">
+    <div class="list-group">
+        <a class="list-group-item list-group-item-success" href="javascript:void(0)" ng-click="create()">添加项目</a>
+    </div>
+</div>
+<ul class="col-md-10 project-list row">
+    <li class="project-list-item col-sm-3" ng-repeat="project in projects track by project._id">
+        <div class="panel panel-default" ng-show="!project.edit">
+            <div class="panel-heading">
+                <a ng-href="#/project/{{ project._id }}" ng-bind="project.name"></a>
+                <a ng-href="#/doc/{{ project._id }}"><span class="label label-info">DOC</span></a>
+            </div>
+            <div class="panel-body">
+                <p ng-bind="project.description"></p>
+                <div class="btn-group pull-right">
+                    <button class="btn btn-xs btn-default" type="button" ng-click="edit(project)">编辑</button>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default panel-edit" ng-show="project.edit">
+            <div class="panel-heading">
+                <input class="form-control" type="text" placeholder="请输入项目名称" ng-model="project.name"/>
+            </div>
+            <div class="panel-body">
+                <textarea class="form-control" rows="3" placeholder="请输入项目介绍" ng-model="project.description"></textarea>
+                <div class="btn-group pull-right">
+                    <button class="btn btn-xs btn-success" type="button" ng-click="save(project)">保存</button>
+                    <button class="btn btn-xs btn-default" type="button" ng-click="cancel(project)">取消</button>
+                </div>
+            </div>
+        </div>
+    </li>
+
+    <li class="project-list-item col-sm-3" ng-show="newProject">
+        <div class="panel panel-default panel-edit">
+            <div class="panel-heading">
+                <input class="form-control" type="text" placeholder="请输入项目名称" ng-model="newProject.name"/>
+            </div>
+            <div class="panel-body">
+                <textarea class="form-control" rows="3" placeholder="请输入项目介绍" ng-model="newProject.description"></textarea>
+                <div class="btn-group pull-right">
+                    <button class="btn btn-xs btn-success" type="button" ng-click="save()">保存</button>
+                    <button class="btn btn-xs btn-default" type="button" ng-click="cancel()">取消</button>
+                </div>
+            </div>
+        </div>
+    </li>
 </ul>
+
+<script type="text/ng-template" id="projectModal"></script>

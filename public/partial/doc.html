@@ -1,0 +1,80 @@
+<div class="row">
+    <div class="col-md-3">
+        <div id="apiList" class="list-group">
+            <a class="list-group-item disabled" href="javascript:void(0)" ng-bind="projectId"></a>
+            <a class="list-group-item" ng-repeat="api in apis | filter: {url: filter.url}" href="javascript:void(0)" ng-bind="api.name" ng-click="select($index)"></a>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <form class="form-horizontal" role="form" ng-show="selected.index >= 0">
+            <div class="panel panel-default">
+                <div class="panel-heading">接口信息</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">接口名称</label>
+                        <div class="col-sm-6">
+                            <p class="form-control-static" ng-bind="selected.api.name"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">接口地址</label>
+                        <div class="col-sm-6">
+                            <p class="form-control-static" ng-bind="selected.api.url"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">请求方法</label>
+                        <div class="col-sm-6">
+                            <p class="form-control-static" ng-bind="selected.api.method"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>请求参数</span>
+                </div>
+
+                <ul class="list-group param-list">
+                    <li class="list-group-item">
+                        <dt class="col-sm-2">名称</dt>
+                        <dt class="col-sm-2">类型</dt>
+                        <dt class="col-sm-7">备注</dt>
+                    </li>
+                    <li class="list-group-item" ng-show="selected.api.reqParams.length === 0">
+                        <p>暂无参数</p>
+                    </li>
+                    <li class="list-group-item" ng-repeat="param in (params = selected.api.reqParams)" ng-include="'paramTable.html'"></li>
+                </ul>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>响应参数</span>
+                </div>
+                <ul class="list-group param-list">
+                    <li class="list-group-item">
+                        <dt class="col-sm-2">名称</dt>
+                        <dt class="col-sm-2">类型</dt>
+                        <dt class="col-sm-7">备注</dt>
+                    </li>
+                    <li class="list-group-item" ng-show="selected.api.resParams.length === 0">
+                        <p>暂无参数</p>
+                    </li>
+                    <li class="list-group-item" ng-repeat="param in (params = selected.api.resParams)" ng-include="'paramTable.html'"></li>
+                </ul>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/ng-template" id="paramTable.html">
+    <dt class="col-sm-2" ng-bind="param.name"></dt>
+    <dd class="col-sm-2" ng-bind="param.type"></dd>
+    <dd class="col-sm-7" ng-bind="param.note"></dd>
+    <ul class="list-group col-md-12" ng-if="param.params.length > 0">
+        <li class="list-group-item" ng-repeat="param in (params = param.params)" ng-include="'paramTable.html'"></li>
+    </ul>
+</script>
