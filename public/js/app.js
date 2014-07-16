@@ -152,7 +152,7 @@ function ApiCtrl($scope, $timeout, $routeParams, Api) {
   };
 
   $scope.methodTypes = ['GET', 'POST', 'PUT', 'DELETE'];
-  $scope.paramTypes = ['', 'int', 'string', 'object', 'arrayInt', 'arrayString', 'arrayObject'];
+  $scope.paramTypes = ['', 'number', 'string', 'object', 'boolean', 'arrayNumber', 'arrayString', 'arrayObject', 'arrayBoolean', ':route'];
 
   $scope.projectId = $routeParams.projectId;
 
