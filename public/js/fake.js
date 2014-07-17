@@ -3,7 +3,7 @@
  */
 
 (function($) {
-  var routes = [];
+  var routes = {};
 
   var MAX_VALUE = 9007199254740991;
   var MIN_VALUE = -MAX_VALUE;
@@ -21,7 +21,29 @@
     return o === undefined ? 'undefined' : o === null ? 'null' : toString.call(o).match(/^\[.+\s(.+)\]$/)[1].toLowerCase();
   }
 
+  if (typeof $ !== 'undefined') {
+    var $ajax = $.ajax;
+    $.ajax = function fakeAjax(url, options) {
+      if (typeof url === "object") {
+        options = url;
+        url = options.url;
+      }
+
+      if (options.dataType === 'json') {
+        for (var route in routes) {
+          if (routes.hasOwnProperty(route) && new RegExp(route).test(url)) {
+            options.success(Fake.generate(routes[route]));
+            return $;
+          }
+        }
+      }
+
+      return $ajax.apply(this, arguments);
+    }
+  }
+
   Fake.mock = function(route, template) {
+    // todo mock by template from a determined url.
     if (typeof template !== 'undefined') {
       routes[route] = template;
     }
@@ -38,11 +60,6 @@
 
     for (var key in template) {
       if (template.hasOwnProperty(key)) {
-        /*
-         'name': value
-         'name;count': value
-         'name;min;max': value
-         */
         var argv = key.split(';'), argc = argv.length;
         var value = template[key];
         var numberArgs;
@@ -66,6 +83,12 @@
               else if (numberArgs.length == 3) {
                 mockData[name] = Fake.Random.floating({min: +numberArgs[0], max: +numberArgs[1], fixed: +numberArgs[2]});
               }
+              else {
+                console.error('[N]Format error', name);
+              }
+            }
+            else {
+              console.error('[N]Format error', name);
             }
             break;
           }
@@ -101,6 +124,10 @@
               }
               case 'number': {
                 count = argc == 3 ? +argv[1] : Fake.Random.integer({min: +argv[1], max: +argv[2]});
+                if (isNaN(count)) {
+                  console.error('[N]Format error', name);
+                  continue;
+                }
                 numberArgs = argv[argv.length - 1];
                 buf = new Array(count);
 
@@ -114,14 +141,22 @@
                 else {
                   numberArgs = numberArgs.split('-');
                   if (numberArgs.length == 2) {
+                    numberArgs[0] = +numberArgs[0];
+                    numberArgs[1] = +numberArgs[1];
                     for (i = 0; i < count; i++) {
-                      buf[i] = Fake.Random.integer({min: +numberArgs[0], max: +numberArgs[1]});
+                      buf[i] = Fake.Random.integer({min: numberArgs[0], max: numberArgs[1]});
                     }
                   }
                   else if (numberArgs.length == 3) {
+                    numberArgs[0] = +numberArgs[0];
+                    numberArgs[1] = +numberArgs[1];
+                    numberArgs[2] = +numberArgs[2];
                     for (i = 0; i < count; i++) {
-                      buf[i] = Fake.Random.floating({min: +numberArgs[0], max: +numberArgs[1], fixed: +numberArgs[2]});
+                      buf[i] = Fake.Random.floating({min: numberArgs[0], max: numberArgs[1], fixed: numberArgs[2]});
                     }
+                  }
+                  else {
+                    console.error('[N]Format error', name);
                   }
                 }
 
@@ -138,13 +173,13 @@
                 break;
               }
               default: {
-                console.error('[A]Type not match');
+                console.error('[A]Type not match', name);
               }
             }
             break;
           }
           default: {
-            console.error('[T]Type not match')
+            console.error('[T]Type not match', name)
           }
         }
       }
@@ -354,6 +389,7 @@
       Fake.Util.extend(Fake.Random, src);
     },
     Random: Fake.Random,
+    mock: Fake.mock,
     generate: Fake.generate
   };
   window.Random = Fake.Random;
