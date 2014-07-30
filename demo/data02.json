@@ -1,0 +1,22 @@
+{
+  "id": 8323,
+  "name": "Cfrk Rvx",
+  "age": 23,
+  "salary": 2724.47,
+  "alive": 1,
+  "ip": "77.151.114.59",
+  "goods": [
+    {
+      "name": "Zoj",
+      "price": 50.36,
+      "imgId": [1, 2, 3, 4],
+      "tag": ["Zrjc", "Jlz"]
+    },
+    {
+      "name": "Lerjj",
+      "price": 62,
+      "imgId": [1, 2, 3],
+      "tag": ["Wcfz", "Pcfzll", "Dzzuhi"]
+    }
+  ]
+}
